@@ -1,4 +1,4 @@
-import { Redirect, Route } from 'react-router-dom';
+import { Redirect, Route, RouteComponentProps } from 'react-router-dom';
 import { IonApp, IonRouterOutlet } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import Home from './pages/Home';
@@ -21,20 +21,43 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
-
-const App: React.FC = () => (
-  <IonApp>
-    <IonReactRouter>
-      <IonRouterOutlet>
-        <Route exact path="/home">
-          <Home />
-        </Route>
-        <Route exact path="/">
-          <Redirect to="/home" />
-        </Route>
-      </IonRouterOutlet>
-    </IonReactRouter>
-  </IonApp>
-);
+import RealmApolloProvider from './graphql/RealmApolloProvider';
+import { RealmAppProvider, useRealmApp } from './Realm';
+import { Login } from './pages/Login';
+export const APP_ID = 'tasktracker-gbxoc';
+interface Props {
+  Component: React.FC<RouteComponentProps>;
+  path: string;
+  exact?: boolean;
+}
+const AuthRoute = ({ Component, path, exact = true }: Props): JSX.Element => {
+  const app = useRealmApp();
+  const isAuthed = !!app.currentUser;
+  return (
+    <Route
+      exact={exact}
+      path={path}
+      render={(props: RouteComponentProps) =>
+        isAuthed ? <Component {...props} /> : <Redirect to="/" />
+      }
+    />
+  );
+};
+const App: React.FC = () => {
+  return (
+    <RealmAppProvider appId={APP_ID}>
+      <RealmApolloProvider>
+        <IonApp>
+          <IonReactRouter>
+            <IonRouterOutlet>
+              <AuthRoute path="/home" Component ={Home}/>
+              <Route exact path="/" component={Login} />
+            </IonRouterOutlet>
+          </IonReactRouter>
+        </IonApp>
+      </RealmApolloProvider>
+    </RealmAppProvider>
+  );
+};
 
 export default App;

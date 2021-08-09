@@ -1,0 +1,12 @@
+ion-item-sliding.status-Complete ion-label {
+  border-left: 2px solid var(--ion-color-success);
+  padding-left: 10px;
+}
+ion-item-sliding.status-InProgress ion-label {
+  border-left: 2px solid var(--ion-color-warning);
+  padding-left: 10px;
+}
+ion-item-sliding.status-Open ion-label {
+  border-left: 2px solid var(--ion-color-primary);
+  padding-left: 10px;
+}

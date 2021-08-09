@@ -1,0 +1,15 @@
+.login-page ion-content,
+.login-page ion-content::part(scroll) {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+}
+
+.login-page form {
+  max-width: 600px;
+  margin: auto;
+  flex: 1 1 auto;
+}
