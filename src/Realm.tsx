@@ -6,20 +6,12 @@ const RealmAppContext = createContext<Partial<Realm.App>>({});
 export const useRealmApp = () => {
   const app = useContext(RealmAppContext);
   if (!app) {
-    throw new Error(
-      `You must call useRealmApp() inside of a <RealmAppProvider />`
-    );
+    throw new Error( `You must call useRealmApp() inside of a <RealmAppProvider />`);
   }
   return app;
 };
 
-export const RealmAppProvider = ({
-  appId,
-  children,
-}: {
-  appId: any;
-  children: JSX.Element;
-}) => {
+export const RealmAppProvider = ({ appId, children, }: { appId: any; children: JSX.Element; }) => {
   const [app, setApp] = useState(new Realm.App(appId));
   const [currentUser, setCurrentUser] = useState(app.currentUser);
 
