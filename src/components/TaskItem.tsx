@@ -7,19 +7,20 @@ import {
   useIonAlert,
 } from '@ionic/react';
 import { useRef, useState } from 'react';
-import useTaskMutations from '../graphql/useTaskMutations';
-import { useRealmApp } from '../Realm';
+import { useMongoDB } from '../rest/Mongo';
+
 import './TaskItem.css';
 
-export function TaskItem(task: {
+type taskProp  = {
   name: string;
-  status: 'Open' | 'In Progress' | 'Complete';
+  status: 'Open' | 'InProgress' | 'Complete';
   __typename: string;
   _id: string;
-}) {
-  const app = useRealmApp();
-  const [project] = useState(app.currentUser?.customData.memberOf[0]);
-  const { updateTask } = useTaskMutations(project);
+}
+export function TaskItem(task: taskProp) {
+  const db = useMongoDB('Task')
+
+  const [state, setState] = useState<taskProp>(task)
   const slidingRef = useRef<HTMLIonItemSlidingElement | null>(null);
   const [presentAlert] = useIonAlert();
 
@@ -32,44 +33,49 @@ export function TaskItem(task: {
           type: 'radio',
           label: 'Open',
           value: 'Open',
-          checked: !!(task.status === 'Open'),
+          checked: !!(state.status === 'Open'),
         },
         {
           name: 'In Progress',
           type: 'radio',
           label: 'In Progress',
           value: 'InProgress',
-          checked: !!(task.status === 'In Progress'),
+          checked: !!(state.status === 'InProgress'),
         },
         {
           name: 'Complete',
           type: 'radio',
           label: 'Complete',
           value: 'Complete',
-          checked: !!(task.status === 'Complete'),
+          checked: !!(state.status === 'Complete'),
         },
       ],
       buttons: [
         {
           text: 'Cancel',
           role: 'cancel',
-          cssClass: 'secondary',
         },
         {
           text: 'Ok',
+          role: 'confirm',
         },
       ],
       onDidDismiss: async (ev) => {
-        const toStatus = ev.detail.data.values;
-        await updateTask(task, { status: toStatus });
+        if(ev.detail.role === 'confirm'){
+          const toStatus = ev.detail.data.values;
+          setState({...task, status: toStatus})
+          await db.updateOne(task, {...task, status: toStatus});
+        }
         slidingRef.current?.close();
       },
     });
   };
   return (
-    <IonItemSliding ref={slidingRef} className={'status-' + task.status}>
+    <IonItemSliding ref={slidingRef} className={'status-' + state.status}>
       <IonItem>
-        <IonLabel>{task.name}</IonLabel>
+      <IonLabel>
+      {state.name}
+      </IonLabel>
       </IonItem>
       <IonItemOptions side="end">
         <IonItemOption onClick={toggleStatus}>Status</IonItemOption>

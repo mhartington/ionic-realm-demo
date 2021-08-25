@@ -12,29 +12,51 @@ import {
   useIonAlert,
 } from '@ionic/react';
 import { add } from 'ionicons/icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TaskItem } from '../components/TaskItem';
-import useTasks from '../graphql/useTasks';
 import { useRealmApp } from '../Realm';
+import { ObjectId } from 'bson';
+
+import { useMongoDB } from '../rest/Mongo';
 import './Home.css';
 
-const Home: React.FC = () => {
+export function Home() {
+  const [loading, setLoading] = useState(true);
+  const [tasks, setTasks] = useState<Array<any>>([]);
+
   const app = useRealmApp();
   const [currentProject] = useState(app.currentUser?.customData.memberOf[0]);
-  const { tasks, addTask, loading } = useTasks(currentProject);
+  const db = useMongoDB('Task');
+
   const [presentAlert] = useIonAlert();
+
+  const loadTasks = async () => {
+    console.log(db.find)
+    const tasksRes = await db.find();
+    setTasks(tasksRes);
+    setLoading(false);
+  };
+
+  useEffect(() => { loadTasks(); }, []);
+
 
   const addNewTask = () => {
     presentAlert({
       header: 'Add a new task',
-      inputs: [{ type: 'text', label: 'New Task' }],
+      inputs: [{ type: 'text', label: 'New Task', name: 'newTask' }],
       buttons: ['Cancel', 'Add'],
       onDidDismiss: async (e) => {
-        const taskToAdd = e.detail.data.values[0];
+        const taskToAdd = e.detail.data.values.newTask;
         if (!taskToAdd) {
           return;
         }
-        await addTask({ name: taskToAdd });
+        await db.insertOne({
+          name: taskToAdd,
+          status: 'Open',
+          _id: new ObjectId(),
+          _partition: currentProject.partition,
+        });
+        loadTasks();
       },
     });
   };

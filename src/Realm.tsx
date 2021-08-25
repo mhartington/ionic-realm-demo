@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+
 import * as Realm from 'realm-web';
 
 const RealmAppContext = createContext<Partial<Realm.App>>({});
