@@ -12,7 +12,7 @@ export function useMongoDB(collection: string){
   return doc;
 };
 
-export const MongoDBProvider = ({ children }: { children: JSX.Element }) => {
+export const MongoDBProvider: React.FC = ({ children }) => {
   const { currentUser } = useRealmApp();
   const [db, setDB] = useState<globalThis.Realm.Services.MongoDBDatabase | null>(null);
   useEffect(() => {

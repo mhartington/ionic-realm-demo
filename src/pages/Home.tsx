@@ -82,7 +82,7 @@ export function Home() {
         <IonList>
           {loading ? <IonLoading isOpen={loading} /> : null}
           {tasks.map((task: any) => (
-            <TaskItem key={parseInt(task._id)} {...task}></TaskItem>
+            <TaskItem key={parseInt(task._id)} task={task} onStatusDidChange={loadTasks}></TaskItem>
           ))}
         </IonList>
       </IonContent>

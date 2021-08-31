@@ -6,21 +6,26 @@ import {
   IonLabel,
   useIonAlert,
 } from '@ionic/react';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useMongoDB } from '../rest/Mongo';
 
 import './TaskItem.css';
 
-type taskProp  = {
+type taskProp = {
   name: string;
   status: 'Open' | 'InProgress' | 'Complete';
   __typename: string;
   _id: string;
-}
-export function TaskItem(task: taskProp) {
-  const db = useMongoDB('Task')
+};
+export function TaskItem({
+  task,
+  onStatusDidChange,
+}: {
+  task: taskProp;
+  onStatusDidChange: Function;
+}) {
+  const db = useMongoDB('Task');
 
-  const [state, setState] = useState<taskProp>(task)
   const slidingRef = useRef<HTMLIonItemSlidingElement | null>(null);
   const [presentAlert] = useIonAlert();
 
@@ -33,21 +38,21 @@ export function TaskItem(task: taskProp) {
           type: 'radio',
           label: 'Open',
           value: 'Open',
-          checked: !!(state.status === 'Open'),
+          checked: !!(task.status === 'Open'),
         },
         {
           name: 'In Progress',
           type: 'radio',
           label: 'In Progress',
           value: 'InProgress',
-          checked: !!(state.status === 'InProgress'),
+          checked: !!(task.status === 'InProgress'),
         },
         {
           name: 'Complete',
           type: 'radio',
           label: 'Complete',
           value: 'Complete',
-          checked: !!(state.status === 'Complete'),
+          checked: !!(task.status === 'Complete'),
         },
       ],
       buttons: [
@@ -60,22 +65,21 @@ export function TaskItem(task: taskProp) {
           role: 'confirm',
         },
       ],
-      onDidDismiss: async (ev) => {
-        if(ev.detail.role === 'confirm'){
+      onDidDismiss: (ev) => {
+        if (ev.detail.role === 'confirm') {
           const toStatus = ev.detail.data.values;
-          setState({...task, status: toStatus})
-          await db.updateOne(task, {...task, status: toStatus});
+          return db.updateOne(task, { ...task, status: toStatus }).then(() => {
+            slidingRef.current?.close();
+            onStatusDidChange();
+          });
         }
-        slidingRef.current?.close();
       },
     });
   };
   return (
-    <IonItemSliding ref={slidingRef} className={'status-' + state.status}>
+    <IonItemSliding ref={slidingRef} className={'status-' + task.status}>
       <IonItem>
-      <IonLabel>
-      {state.name}
-      </IonLabel>
+        <IonLabel>{task.name}</IonLabel>
       </IonItem>
       <IonItemOptions side="end">
         <IonItemOption onClick={toggleStatus}>Status</IonItemOption>

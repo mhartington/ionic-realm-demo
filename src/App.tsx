@@ -8,7 +8,6 @@ import '@ionic/react/css/ionic.bundle.css';
 /* Theme variables */
 import './theme/variables.css';
 
-// import RealmApolloProvider from './graphql/RealmApolloProvider';
 import { RealmAppProvider, useRealmApp } from './Realm';
 
 import { Login } from './pages/Login';
@@ -37,7 +36,6 @@ const AuthRoute = ({ Component, path, exact = true }: Props): JSX.Element => {
 const App: React.FC = () => {
   return (
     <RealmAppProvider appId={APP_ID}>
-      {/* <RealmApolloProvider> */}
       <MongoDBProvider>
         <IonApp>
           <IonReactRouter>
@@ -48,7 +46,6 @@ const App: React.FC = () => {
           </IonReactRouter>
         </IonApp>
       </MongoDBProvider>
-      {/* </RealmApolloProvider> */}
     </RealmAppProvider>
   );
 };
